@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push, set, onValue, update, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdDnuUlqaHyMYc0vKOmjLFxFSTmWh3gIw",
@@ -16,76 +16,123 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// Global o'zgaruvchilar
+let currentBalance = 0;
+
 // Modal elementlari
 const modal = document.getElementById("ad-modal");
 const openBtn = document.getElementById("open-modal");
-const closeBtn = document.getElementsByClassName("close")[0];
+const closeBtn = document.querySelector(".close");
 const adForm = document.getElementById("add-ad-form");
 
-// Modalni ochish/yopish
-openBtn.onclick = () => modal.style.display = "block";
-closeBtn.onclick = () => modal.style.display = "none";
+if (openBtn) openBtn.onclick = () => modal.style.display = "block";
+if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
+window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
 
-// Foydalanuvchi ma'lumotlarini yuklash
+// Foydalanuvchi holatini tekshirish
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        loadBalance(user.uid);
         loadUserAds(user.uid);
     } else {
         window.location.href = 'index.html';
     }
 });
 
-// Reklamalarni Realtime Database'dan o'qish
+// Balansni yuklash
+function loadBalance(uid) {
+    const balanceRef = ref(db, `advertisers/${uid}/balance`);
+    onValue(balanceRef, (snapshot) => {
+        currentBalance = snapshot.val() || 0;
+        document.getElementById('user-balance').innerText = `$${currentBalance.toFixed(2)}`;
+    });
+}
+
+// Reklamalarni yuklash
 function loadUserAds(uid) {
     const adsRef = ref(db, 'ads');
     onValue(adsRef, (snapshot) => {
         const adsGrid = document.getElementById('ads-grid');
+        if (!adsGrid) return;
         adsGrid.innerHTML = '';
         const data = snapshot.val();
         
         let hasAds = false;
-        for (let id in data) {
-            if (data[id].ownerId === uid) {
-                hasAds = true;
-                adsGrid.innerHTML += `
-                    <div class="ad-card">
-                        <img src="${data[id].image}" alt="ad">
-                        <div class="ad-card-body">
-                            <h4>${data[id].title}</h4>
-                            <p>Byudjet: $${data[id].budget}</p>
-                            <span class="ad-status">${data[id].status}</span>
+        if (data) {
+            for (let id in data) {
+                if (data[id].ownerId === uid) {
+                    hasAds = true;
+                    adsGrid.innerHTML += `
+                        <div class="ad-card">
+                            <img src="${data[id].image}" alt="ad">
+                            <div class="ad-card-body">
+                                <h4>${data[id].title}</h4>
+                                <p>Byudjet: $${data[id].budget.toFixed(2)}</p>
+                                <span class="ad-status" style="background:${data[id].status === 'active' ? '#e8f5e9' : '#ffebee'}">
+                                    ${data[id].status}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
         }
-        if (!hasAds) adsGrid.innerHTML = '<p>Hozircha reklamalar yo\'q.</p>';
+        if (!hasAds) adsGrid.innerHTML = '<p id="no-ads">Hozircha reklamalar yo\'q.</p>';
     });
 }
 
-// Yangi reklama qo'shish
-adForm.onsubmit = (e) => {
+// Yangi reklama qo'shish (Tekshiruv bilan)
+adForm.onsubmit = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
-    
+    if (!user) return;
+
+    const adBudget = parseFloat(document.getElementById('ad-budget').value);
+
+    // 🛑 ASOSIY TEKSHIRUV: Balans yetarlimi?
+    if (adBudget > currentBalance) {
+        alert(`Xatolik: Balans yetarli emas! Sizda $${currentBalance.toFixed(2)} bor, lekin $${adBudget.toFixed(2)} kiritdingiz.`);
+        return;
+    }
+
+    if (adBudget <= 0) {
+        alert("Byudjet 0 dan katta bo'lishi kerak!");
+        return;
+    }
+
     const newAd = {
         ownerId: user.uid,
         title: document.getElementById('ad-title').value,
         image: document.getElementById('ad-image').value,
         url: document.getElementById('ad-url').value,
-        budget: parseFloat(document.getElementById('ad-budget').value),
+        budget: adBudget,
         status: "active",
-        views: 0
+        views: 0,
+        clicks: 0,
+        createdAt: Date.now()
     };
 
-    const adsRef = ref(db, 'ads');
-    const newAdRef = push(adsRef);
-    set(newAdRef, newAd).then(() => {
+    try {
+        // 1. Reklamani qo'shish
+        const adsRef = ref(db, 'ads');
+        const newAdRef = push(adsRef);
+        await set(newAdRef, newAd);
+
+        // 2. Foydalanuvchi balansidan pulni ayirish
+        const userBalanceRef = ref(db, `advertisers/${user.uid}`);
+        await update(userBalanceRef, {
+            balance: increment(-adBudget)
+        });
+
         modal.style.display = "none";
         adForm.reset();
-        alert("Reklama muvaffaqiyatli qo'shildi!");
-    });
+        alert("Reklama muvaffaqiyatli qo'shildi va mablag' balansdan yechildi!");
+
+    } catch (error) {
+        console.error("Xatolik:", error);
+        alert("Xatolik yuz berdi: " + error.message);
+    }
 };
 
-// Logout
-document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
+// Chiqish
+document.getElementById('logout-btn').onclick = () => signOut(auth);
