@@ -46,7 +46,7 @@ function loadBalance(uid) {
     onValue(balanceRef, (snapshot) => {
         const balance = snapshot.val() || 0;
         const balanceElem = document.getElementById('pub-balance');
-        if (balanceElem) balanceElem.innerText = `$${balance.toFixed(2)}`;
+        if (balanceElem) balanceElem.innerText = `$${balance.toFixed(4)}`;
     });
 }
 
