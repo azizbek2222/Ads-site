@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AdsGram Clone - Kirish</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card">
+            <h2 id="auth-title">Xush kelibsiz</h2>
+            <p id="auth-desc">Davom etish uchun tizimga kiring</p>
+            
+            <form id="auth-form">
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email manzilingiz" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Parol" required>
+                </div>
+                <button type="submit" id="main-btn">Tizimga kirish</button>
+            </form>
+
+            <div class="toggle-auth">
+                <span id="toggle-text">Akkauntingiz yo'qmi?</span>
+                <a href="#" id="toggle-link">Ro'yxatdan o'tish</a>
+            </div>
+            
+            <p id="error-message" class="error"></p>
+        </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>

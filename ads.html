@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ads Platform - Tanlov</title>
+    <link rel="stylesheet" href="ads.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="user-info">
+                <span id="user-email">Yuklanmoqda...</span>
+            </div>
+            <button id="logout-btn">Chiqish</button>
+        </header>
+
+        <main class="selection-area">
+            <h1>Xush kelibsiz!</h1>
+            <p>Davom etish uchun o'z rolingizni tanlang:</p>
+
+            <div class="cards-grid">
+                <div class="role-card" id="advertiser-card">
+                    <div class="icon">📢</div>
+                    <h2>Reklama Beruvchi</h2>
+                    <p>Mahsulotingizni targ'ib qiling va yangi mijozlar toping.</p>
+                    <button class="action-btn">Reklama berish</button>
+                </div>
+
+                <div class="role-card" id="publisher-card">
+                    <div class="icon">💰</div>
+                    <h2>Reklama Oluvchi</h2>
+                    <p>Botingizga reklama joylang va har bir ko'rishdan pul ishlang.</p>
+                    <button class="action-btn secondary">Pul ishlash</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="ads.js"></script>
+</body>
+</html>

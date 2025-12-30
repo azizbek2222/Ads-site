@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nashriyotchi Paneli - Pul ishlash</title>
+    <link rel="stylesheet" href="publisher.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h2>AdsGram</h2>
+            <nav>
+                <a href="ads.html">🏠 Asosiy</a>
+                <a href="#" class="active">💰 Mening Botlarim</a>
+                <button id="logout-btn">Chiqish</button>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <h1>Nashriyotchi Paneli</h1>
+                <div class="wallet-status">
+                    Daromad: <span id="pub-balance">$0.00</span>
+                </div>
+            </header>
+
+            <section class="action-section">
+                <button class="btn-success" id="open-app-modal">➕ Yangi Bot/Ilova qo'shish</button>
+            </section>
+
+            <section class="apps-container">
+                <h3>Sizning ilovalaringiz va SDK</h3>
+                <div id="apps-list" class="apps-list">
+                    <p>Ilovalar yuklanmoqda...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="app-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ilovangizni ro'yxatdan o'tkazing</h2>
+            <form id="add-app-form">
+                <input type="text" id="app-name" placeholder="Bot yoki Ilova nomi" required>
+                <button type="submit" class="btn-primary">ID olish</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="publisher.js"></script>
+</body>
+</html>

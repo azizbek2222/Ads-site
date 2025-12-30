@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reklama Beruvchi Paneli</title>
+    <link rel="stylesheet" href="advertiser.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h2>AdsGram</h2>
+            <nav>
+                <a href="ads.html">🏠 Asosiy</a>
+                <a href="#" class="active">📢 Reklamalarim</a>
+                <button id="logout-btn">Chiqish</button>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <h1>Reklama Beruvchi Paneli</h1>
+                <div class="wallet-status">
+                    Balans: <span id="user-balance">$0.00</span>
+                </div>
+            </header>
+
+            <section class="stats-overview">
+                <button class="btn-primary" id="open-modal">➕ Yangi Reklama Qo'shish</button>
+            </section>
+
+            <section class="ads-list-container">
+                <h3>Sizning reklamalaringiz</h3>
+                <div id="ads-grid" class="ads-grid">
+                    <p id="no-ads">Hozircha reklamalar yo'q.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="ad-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Yangi Reklama Yarating</h2>
+            <form id="add-ad-form">
+                <input type="text" id="ad-title" placeholder="Reklama sarlavhasi" required>
+                <input type="url" id="ad-image" placeholder="Rasm URL manzili" required>
+                <input type="url" id="ad-url" placeholder="Yo'naltiruvchi havola (Link)" required>
+                <input type="number" id="ad-budget" placeholder="Byudjet ($)" step="0.01" required>
+                <button type="submit" class="btn-success">Saqlash va Yuborish</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="advertiser.js"></script>
+</body>
+</html>
