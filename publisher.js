@@ -1,12 +1,12 @@
 // Firebase modullarini to'g'ri URL orqali import qilamiz
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDdDnuUlqaHyMYc0vKOmjLFxFSTmWh3gIw",
   authDomain: "sample-firebase-ai-app-955f2.firebaseapp.com",
-  databaseURL: "https://sample-firebase-ai-app-955f2-default-rtdb.firebaseio.com", // RTDB manzili to'g'riligini tekshiring
+  databaseURL: "https://sample-firebase-ai-app-955f2-default-rtdb.firebaseio.com",
   projectId: "sample-firebase-ai-app-955f2",
   storageBucket: "sample-firebase-ai-app-955f2.firebasestorage.app",
   messagingSenderId: "310796131581",
@@ -33,6 +33,15 @@ window.onclick = (event) => { if (event.target == modal) modal.style.display = "
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("Foydalanuvchi tizimda:", user.uid);
+        
+        // --- YANGI QISM: Emailni bazaga yozish (Admin panel qidirishi uchun) ---
+        const userRef = ref(db, 'publishers/' + user.uid);
+        update(userRef, {
+            email: user.email.toLowerCase(),
+            uid: user.uid
+        });
+        // -------------------------------------------------------------------
+
         loadUserApps(user.uid);
         loadBalance(user.uid);
     } else {
@@ -65,7 +74,6 @@ function loadUserApps(uid) {
             for (let id in data) {
                 if (data[id].ownerId === uid) {
                     hasApps = true;
-                    // SDK kodi GitHub manzili bilan
                     const sdkCode = `<script type="module" src="https://azizbek2222.github.io/ads/sdk.js" data-app-id="${id}"></script>`;
                     
                     appsList.innerHTML += `
@@ -97,8 +105,6 @@ if (appForm) {
         }
 
         const appName = appNameInput.value;
-        console.log("Loyiha qo'shilmoqda:", appName);
-
         const newAppRef = push(ref(db, 'publisher_apps'));
         set(newAppRef, {
             ownerId: user.uid,
@@ -106,12 +112,10 @@ if (appForm) {
             createdAt: Date.now()
         })
         .then(() => {
-            console.log("Loyiha muvaffaqiyatli qo'shildi");
             modal.style.display = "none";
             appForm.reset();
         })
         .catch((error) => {
-            console.error("Xatolik yuz berdi:", error);
             alert("Xatolik: " + error.message);
         });
     });

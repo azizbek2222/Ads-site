@@ -32,6 +32,14 @@ window.onclick = (event) => { if (event.target == modal) modal.style.display = "
 // Foydalanuvchi holatini tekshirish
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        // --- YANGI QISM: Emailni bazaga yozish (Admin panel qidirishi uchun) ---
+        const userRef = ref(db, 'advertisers/' + user.uid);
+        update(userRef, {
+            email: user.email.toLowerCase(),
+            uid: user.uid
+        });
+        // -------------------------------------------------------------------
+
         loadBalance(user.uid);
         loadUserAds(user.uid);
     } else {
@@ -89,9 +97,8 @@ adForm.onsubmit = async (e) => {
 
     const adBudget = parseFloat(document.getElementById('ad-budget').value);
 
-    // 🛑 ASOSIY TEKSHIRUV: Balans yetarlimi?
     if (adBudget > currentBalance) {
-        alert(`Xatolik: Balans yetarli emas! Sizda $${currentBalance.toFixed(2)} bor, lekin $${adBudget.toFixed(2)} kiritdingiz.`);
+        alert(`Xatolik: Balans yetarli emas! Sizda $${currentBalance.toFixed(2)} bor.`);
         return;
     }
 
@@ -113,12 +120,10 @@ adForm.onsubmit = async (e) => {
     };
 
     try {
-        // 1. Reklamani qo'shish
         const adsRef = ref(db, 'ads');
         const newAdRef = push(adsRef);
         await set(newAdRef, newAd);
 
-        // 2. Foydalanuvchi balansidan pulni ayirish
         const userBalanceRef = ref(db, `advertisers/${user.uid}`);
         await update(userBalanceRef, {
             balance: increment(-adBudget)
@@ -126,13 +131,12 @@ adForm.onsubmit = async (e) => {
 
         modal.style.display = "none";
         adForm.reset();
-        alert("Reklama muvaffaqiyatli qo'shildi va mablag' balansdan yechildi!");
+        alert("Reklama muvaffaqiyatli qo'shildi!");
 
     } catch (error) {
-        console.error("Xatolik:", error);
         alert("Xatolik yuz berdi: " + error.message);
     }
 };
 
 // Chiqish
-document.getElementById('logout-btn').onclick = () => signOut(auth);
+document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
