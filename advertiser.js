@@ -24,8 +24,13 @@ const adForm = document.getElementById("add-ad-form");
 const topUpForm = document.getElementById("top-up-form");
 const adsList = document.getElementById("ads-list");
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
+        // Admin topishi uchun emailni bazaga saqlash
+        await update(ref(db, `advertisers/${user.uid}`), {
+            email: user.email.toLowerCase()
+        });
+
         onValue(ref(db, `advertisers/${user.uid}/balance`), (snapshot) => {
             currentBalance = snapshot.val() || 0;
             document.getElementById('user-balance').innerText = `$${currentBalance.toFixed(2)}`;
@@ -49,9 +54,8 @@ function loadUserAds(uid) {
                     const ad = data[id];
                     const adCard = document.createElement('div');
                     adCard.className = 'ad-card';
-                    // SDK bilan mos bo'lishi uchun ad.image ishlatildi
                     adCard.innerHTML = `
-                        <img src="${ad.image || ad.img}" alt="Ad Image" style="width:100%; height:120px; object-fit:cover; border-radius:8px;">
+                        <img src="${ad.image}" alt="Ad Image" style="width:100%; height:120px; object-fit:cover; border-radius:8px;">
                         <div class="ad-card-body">
                             <h4>${ad.title}</h4>
                             <div class="ad-stats-mini">
@@ -84,7 +88,7 @@ adForm.onsubmit = async (e) => {
     const newAd = {
         ownerId: user.uid,
         title: document.getElementById('ad-title').value,
-        image: document.getElementById('ad-image').value, // SDK bilan mos kalit nomi
+        image: document.getElementById('ad-image').value,
         url: document.getElementById('ad-url').value,
         budget: adBudget,
         views: 0,
@@ -96,27 +100,12 @@ adForm.onsubmit = async (e) => {
     try {
         const newAdRef = push(ref(db, 'ads'));
         await set(newAdRef, newAd);
-
-        await update(ref(db, `advertisers/${user.uid}`), { 
-            balance: increment(-adBudget) 
-        });
-
-        const userSnap = await get(ref(db, `users/${user.uid}`));
-        const userData = userSnap.val();
-
-        if (userData && userData.referredBy) {
-            const bonus = adBudget * 0.02;
-            const referrerId = userData.referredBy;
-            await update(ref(db, `advertisers/${referrerId}`), { balance: increment(bonus) });
-            await update(ref(db, `users/${referrerId}/referralStats`), { advEarned: increment(bonus) });
-        }
-
+        await update(ref(db, `advertisers/${user.uid}`), { balance: increment(-adBudget) });
+        
         adModal.style.display = "none";
         adForm.reset();
-        alert("Reklama muvaffaqiyatli yaratildi!");
-    } catch (err) {
-        alert("Xato: " + err.message);
-    }
+        alert("Reklama yaratildi!");
+    } catch (err) { alert(err.message); }
 };
 
 topUpForm.onsubmit = async (e) => {
@@ -131,20 +120,12 @@ topUpForm.onsubmit = async (e) => {
     }
 
     try {
-        await update(ref(db, `ads/${adId}`), { 
-            budget: increment(extraAmount),
-            status: "active" 
-        });
-        await update(ref(db, `advertisers/${user.uid}`), { 
-            balance: increment(-extraAmount) 
-        });
-
+        await update(ref(db, `ads/${adId}`), { budget: increment(extraAmount), status: "active" });
+        await update(ref(db, `advertisers/${user.uid}`), { balance: increment(-extraAmount) });
         topUpModal.style.display = "none";
         topUpForm.reset();
-        alert("Reklama byudjeti yangilandi!");
-    } catch (err) {
-        alert("Xato: " + err.message);
-    }
+        alert("Byudjet yangilandi!");
+    } catch (err) { alert(err.message); }
 };
 
 window.openModal = (id) => document.getElementById(id).style.display = "flex";
@@ -156,4 +137,3 @@ window.openTopUp = (adId) => {
 
 document.getElementById('open-ad-modal').onclick = () => openModal('ad-modal');
 document.getElementById('logout-btn').onclick = () => signOut(auth);
-document.getElementById('exchange-btn').onclick = () => window.location.href = 'exchange.html';
