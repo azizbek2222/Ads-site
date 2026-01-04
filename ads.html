@@ -38,11 +38,27 @@
             </div>
 
             <div class="extra-actions">
+                <button id="referral-open-btn" class="referral-btn">
+                    <i class="fas fa-users"></i> Referral System
+                </button>
+                
                 <button id="withdraw-page-btn" class="withdraw-btn">
                     <i class="fas fa-wallet"></i> Withdraw Funds
                 </button>
             </div>
         </main>
+    </div>
+
+    <div id="referral-modal" class="mini-app-modal">
+        <div class="mini-app-container">
+            <div class="mini-app-header">
+                <span><i class="fas fa-share-nodes"></i> Referral Program</span>
+                <button id="close-referral">&times;</button>
+            </div>
+            <div class="mini-app-body">
+                <iframe src="referral.html" frameborder="0"></iframe>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="ads.js"></script>

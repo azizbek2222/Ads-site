@@ -22,37 +22,42 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-        signOut(auth).then(() => {
-            window.location.href = 'index.html';
-        }).catch((error) => {
-            console.error("Chiqishda xato:", error);
-        });
-    });
-}
+// Logout
+document.getElementById('logout-btn')?.addEventListener('click', () => {
+    signOut(auth).then(() => { window.location.href = 'index.html'; });
+});
 
-// Reklama beruvchi sahifasiga o'tish
-const advertiserCard = document.getElementById('advertiser-card');
-if (advertiserCard) {
-    advertiserCard.addEventListener('click', () => {
-        window.location.href = 'advertiser.html';
-    });
-}
+// Navigation
+document.getElementById('advertiser-card')?.addEventListener('click', () => {
+    window.location.href = 'advertiser.html';
+});
 
-// Reklama oluvchi sahifasiga o'tish
-const publisherCard = document.getElementById('publisher-card');
-if (publisherCard) {
-    publisherCard.addEventListener('click', () => {
-        window.location.href = 'publisher.html';
-    });
-}
+document.getElementById('publisher-card')?.addEventListener('click', () => {
+    window.location.href = 'publisher.html';
+});
 
-// Mablag'ni yechish sahifasiga o'tish (Yangi)
-const withdrawBtn = document.getElementById('withdraw-page-btn');
-if (withdrawBtn) {
-    withdrawBtn.addEventListener('click', () => {
-        window.location.href = 'withdraw.html';
-    });
-}
+document.getElementById('withdraw-page-btn')?.addEventListener('click', () => {
+    window.location.href = 'withdraw.html';
+});
+
+// --- Referral Mini App Logic ---
+const refModal = document.getElementById('referral-modal');
+const openRefBtn = document.getElementById('referral-open-btn');
+const closeRefBtn = document.getElementById('close-referral');
+
+openRefBtn.onclick = () => {
+    refModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Orqadagi scrollni to'xtatadi
+};
+
+closeRefBtn.onclick = () => {
+    refModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+};
+
+window.onclick = (event) => {
+    if (event.target == refModal) {
+        refModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+};
