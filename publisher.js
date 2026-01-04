@@ -58,7 +58,7 @@ function loadUserApps(uid) {
             for (let id in data) {
                 if (data[id].ownerId === uid) {
                     count++;
-                    const code = `<script type="module" src="https://azizbek2222.github.io/Adsero/sdk.js" data-app-id="${id}"></script>`;
+                    const code = `<script type="module" src="https://adsero.vercel.app/sdk.js" data-app-id="${id}"></script>`;
                     list.innerHTML += `
                         <div class="app-card">
                             <h4>${data[id].name} <span class="id-badge">ID: ${id}</span></h4>
