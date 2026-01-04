@@ -87,3 +87,48 @@ h2 { margin-bottom: 15px; color: #222; }
 @media (max-width: 600px) {
     h1 { font-size: 1.8rem; }
 }
+
+/* Withdraw tugmasi uchun yangi stillar */
+.extra-actions {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+
+.withdraw-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 20px rgba(245, 87, 108, 0.3);
+    transition: all 0.3s ease;
+}
+
+.withdraw-btn i {
+    font-size: 20px;
+}
+
+.withdraw-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(245, 87, 108, 0.4);
+    filter: brightness(1.1);
+}
+
+.withdraw-btn:active {
+    transform: translateY(0);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #555;
+    font-weight: 500;
+}

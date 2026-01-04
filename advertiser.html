@@ -43,7 +43,7 @@
             </section>
 
             <section class="ads-list-container">
-                <h3>Your Active Ads</h3>
+                <h3>Your Active Ads (Click to add budget)</h3>
                 <div id="ads-grid" class="ads-grid">
                     <div class="loader">Loading ads...</div>
                 </div>
@@ -55,7 +55,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Create a New Ad</h2>
-                <span class="close">&times;</span>
+                <span class="close" onclick="closeModal('ad-modal')">&times;</span>
             </div>
             <form id="add-ad-form">
                 <div class="input-group">
@@ -75,6 +75,23 @@
                     <input type="number" id="ad-budget" placeholder="0.00" step="0.01" required>
                 </div>
                 <button type="submit" class="btn-primary">Save and Launch</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="top-up-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Top up Ad Budget</h2>
+                <span class="close" onclick="closeModal('top-up-modal')">&times;</span>
+            </div>
+            <form id="top-up-form">
+                <input type="hidden" id="target-ad-id">
+                <div class="input-group">
+                    <label>Additional Amount ($)</label>
+                    <input type="number" id="extra-budget" placeholder="0.00" step="0.01" required>
+                </div>
+                <button type="submit" class="btn-primary" style="background: var(--primary);">Add Funds</button>
             </form>
         </div>
     </div>

@@ -94,3 +94,37 @@ body { background-color: var(--light-bg); color: var(--text-main); }
     .sidebar { width: 100%; padding: 15px; }
     .top-bar { flex-direction: column; gap: 15px; text-align: center; }
 }
+
+/* ... avvalgi stillar ... */
+
+.ad-card { 
+    background: white; border-radius: 15px; overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s;
+    cursor: pointer; /* Qo'shildi: bosish mumkinligini bildiradi */
+    position: relative;
+}
+
+.ad-card:hover { 
+    transform: translateY(-5px); 
+    border: 2px solid var(--primary); /* Hover bo'lganda ajralib turadi */
+}
+
+/* Hoverda "Add Budget" yozuvini chiqarish (ixtiyoriy) */
+.ad-card::after {
+    content: "Click to add budget";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 136, 204, 0.9);
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    padding: 5px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.ad-card:hover::after {
+    opacity: 1;
+}

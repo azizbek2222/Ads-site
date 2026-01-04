@@ -1,4 +1,3 @@
-// Firebase-ni CDN orqali import qilish
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -11,22 +10,18 @@ const firebaseConfig = {
   appId: "1:310796131581:web:8cb51b40c06bb83e94f294"
 };
 
-// Firebase-ni ishga tushirish
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Foydalanuvchi holatini tekshirish
 onAuthStateChanged(auth, (user) => {
     const userEmailElem = document.getElementById('user-email');
     if (user) {
-        userEmailElem.innerText = user.email; // Emailni ko'rsatish
+        userEmailElem.innerText = user.email;
     } else {
-        // Tizimga kirmagan bo'lsa, index.html ga qaytarish
         window.location.href = 'index.html';
     }
 });
 
-// Chiqish tugmasi mantiqi
 const logoutBtn = document.getElementById('logout-btn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
@@ -51,5 +46,13 @@ const publisherCard = document.getElementById('publisher-card');
 if (publisherCard) {
     publisherCard.addEventListener('click', () => {
         window.location.href = 'publisher.html';
+    });
+}
+
+// Mablag'ni yechish sahifasiga o'tish (Yangi)
+const withdrawBtn = document.getElementById('withdraw-page-btn');
+if (withdrawBtn) {
+    withdrawBtn.addEventListener('click', () => {
+        window.location.href = 'withdraw.html';
     });
 }

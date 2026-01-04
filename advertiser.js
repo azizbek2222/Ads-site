@@ -18,15 +18,19 @@ const db = getDatabase(app);
 
 let currentBalance = 0;
 
-const modal = document.getElementById("ad-modal");
+const adModal = document.getElementById("ad-modal");
+const topUpModal = document.getElementById("top-up-modal");
 const openBtn = document.getElementById("open-modal");
-const closeBtn = document.querySelector(".close");
 const adForm = document.getElementById("add-ad-form");
+const topUpForm = document.getElementById("top-up-form");
 const exchangeBtn = document.getElementById('exchange-btn');
 
-if (openBtn) openBtn.onclick = () => modal.style.display = "block";
-if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
-window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
+// Modal funksiyalari
+if (openBtn) openBtn.onclick = () => adModal.style.display = "block";
+window.closeModal = (id) => document.getElementById(id).style.display = "none";
+window.onclick = (e) => { 
+    if (e.target.className === 'modal') e.target.style.display = "none"; 
+};
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -56,17 +60,19 @@ function loadUserAds(uid) {
             for (let id in data) {
                 if (data[id].ownerId === uid) {
                     count++;
-                    grid.innerHTML += `
-                        <div class="ad-card">
-                            <img src="${data[id].image}" alt="ad">
-                            <div class="ad-card-body">
-                                <h4>${data[id].title}</h4>
-                                <p>Budget: <strong>$${data[id].budget.toFixed(2)}</strong></p>
-                                <span class="ad-status" style="background:${data[id].status === 'active' ? '#e8f5e9' : '#ffebee'}; color:${data[id].status === 'active' ? '#2e7d32' : '#c62828'}">
-                                    ${data[id].status}
-                                </span>
-                            </div>
+                    const card = document.createElement('div');
+                    card.className = 'ad-card';
+                    card.onclick = () => openTopUp(id); // Bosilganda byudjet qo'shish
+                    card.innerHTML = `
+                        <img src="${data[id].image}" alt="ad">
+                        <div class="ad-card-body">
+                            <h4>${data[id].title}</h4>
+                            <p>Budget: <strong>$${data[id].budget.toFixed(2)}</strong></p>
+                            <span class="ad-status" style="background:${data[id].status === 'active' ? '#e8f5e9' : '#ffebee'}; color:${data[id].status === 'active' ? '#2e7d32' : '#c62828'}">
+                                ${data[id].status}
+                            </span>
                         </div>`;
+                    grid.appendChild(card);
                 }
             }
         }
@@ -74,6 +80,13 @@ function loadUserAds(uid) {
     });
 }
 
+// Reklama byudjetini oshirish oynasini ochish
+function openTopUp(adId) {
+    document.getElementById('target-ad-id').value = adId;
+    topUpModal.style.display = "block";
+}
+
+// Yangi reklama yaratish
 adForm.onsubmit = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -97,9 +110,40 @@ adForm.onsubmit = async (e) => {
     try {
         await set(push(ref(db, 'ads')), newAd);
         await update(ref(db, `advertisers/${user.uid}`), { balance: increment(-adBudget) });
-        modal.style.display = "none";
+        adModal.style.display = "none";
         adForm.reset();
     } catch (err) { alert(err.message); }
+};
+
+// Mavjud reklama byudjetini oshirish (Top up)
+topUpForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    const adId = document.getElementById('target-ad-id').value;
+    const extraAmount = parseFloat(document.getElementById('extra-budget').value);
+
+    if (extraAmount > currentBalance) {
+        alert("Error: Insufficient balance!");
+        return;
+    }
+
+    try {
+        // Reklama byudjetini oshirish
+        await update(ref(db, `ads/${adId}`), { 
+            budget: increment(extraAmount),
+            status: "active" // Agar byudjet tugab to'xtagan bo'lsa, qayta yoqiladi
+        });
+        // Foydalanuvchi balansidan ayirish
+        await update(ref(db, `advertisers/${user.uid}`), { 
+            balance: increment(-extraAmount) 
+        });
+
+        topUpModal.style.display = "none";
+        topUpForm.reset();
+        alert("Budget updated successfully!");
+    } catch (err) {
+        alert("Update failed: " + err.message);
+    }
 };
 
 if (exchangeBtn) exchangeBtn.onclick = () => window.location.href = 'exchange.html';
