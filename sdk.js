@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, get, update, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Firebase konfiguratsiyasi
 const firebaseConfig = {
   apiKey: "AIzaSyDdDnuUlqaHyMYc0vKOmjLFxFSTmWh3gIw",
   authDomain: "sample-firebase-ai-app-955f2.firebaseapp.com",
@@ -17,33 +16,24 @@ const db = getDatabase(app);
 
 class AdseroSDK {
     constructor() {
-        // HTML-dagi <script data-app-id="..."> tegidan ID ni olish
         const scriptTag = document.querySelector('script[data-app-id]');
         this.appId = scriptTag ? scriptTag.getAttribute('data-app-id') : null;
-        this.rewardAmount = 0.0005; // Har bir ko'rish uchun publisherga beriladigan haq
-        this.init();
+        this.rewardAmount = 0.0005; 
+        this.timerSeconds = 15; // Standart vaqt qat'iy 15 soniya
     }
 
-    async init() {
-        if (!this.appId) {
-            console.error("Adsero SDK: App ID topilmadi!");
-            return;
-        }
-
-        // Loyiha (App) ma'lumotlarini bazadan olish
+    async showInterstitial() {
+        // Tashqaridan seconds argumenti olib tashlandi
+        if (!this.appId) return console.error("Adsero: App ID missing!");
+        
         const appSnap = await get(ref(db, `publisher_apps/${this.appId}`));
-        const appData = appSnap.val();
-
-        if (appData) {
-            this.publisherId = appData.ownerId;
-            this.showAd();
-        } else {
-            console.error("Adsero SDK: Noto'g'ri App ID!");
+        if (appSnap.exists()) {
+            this.publisherId = appSnap.val().ownerId;
+            this.fetchAndShowAd();
         }
     }
 
-    async showAd() {
-        // Tasodifiy aktiv reklamani olish
+    async fetchAndShowAd() {
         const adsSnap = await get(ref(db, 'ads'));
         const ads = adsSnap.val();
         if (!ads) return;
@@ -51,77 +41,85 @@ class AdseroSDK {
         const activeAds = Object.keys(ads).filter(id => ads[id].status === "active" && ads[id].budget > 0);
         if (activeAds.length === 0) return;
 
-        const randomId = activeAds[Math.floor(Math.random() * activeAds.length)];
-        const ad = ads[randomId];
-
-        this.renderAd(randomId, ad);
+        const adId = activeAds[Math.floor(Math.random() * activeAds.length)];
+        this.renderAd(adId, ads[adId]);
     }
 
     renderAd(adId, ad) {
-        const container = document.getElementById('adsero-ad-container');
-        if (!container) return;
+        let container = document.getElementById('adsero-ad-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'adsero-ad-container';
+            document.body.appendChild(container);
+        }
 
         container.innerHTML = `
-            <div style="border:1px solid #ddd; padding:15px; border-radius:10px; text-align:center; background:#fff; max-width:300px; font-family:sans-serif;">
-                <img src="${ad.img}" style="width:100%; border-radius:5px; margin-bottom:10px;">
-                <h4 style="margin:5px 0;">${ad.title}</h4>
-                <button id="adsero-visit-btn" style="background:#0088cc; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; width:100%;">Visit site</button>
-                <small style="display:block; margin-top:5px; color:#999;">Ads by Adsero</small>
+            <div id="adsero-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; display:flex; align-items:center; justify-content:center;">
+                <div style="position:relative; background:white; width:90%; max-width:400px; border-radius:15px; overflow:hidden; text-align:center; font-family:sans-serif;">
+                    <div id=\"adsero-timer\" style=\"position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:white; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:not-allowed;\">
+                        ${this.timerSeconds}
+                    </div>
+                    <img src="${ad.image}" style="width:100%; height:200px; object-fit:cover;">
+                    <div style="padding:20px;">
+                        <h3 style="margin:0 0 10px 0; color:#333;">${ad.title}</h3>
+                        <button id="adsero-visit-btn" style="background:#0088cc; color:white; border:none; padding:12px 25px; border-radius:8px; font-size:16px; cursor:pointer; width:100%;">Visit Website</button>
+                    </div>
+                    <div style="padding-bottom:10px;"><small style="color:#999;">Ads by Adsero</small></div>
+                </div>
             </div>
         `;
 
-        // 5 soniyadan keyin ko'rishni (Impression) hisoblash
-        setTimeout(() => {
-            this.trackImpression(adId);
-        }, 5000);
+        this.startTimer(adId);
 
         document.getElementById('adsero-visit-btn').onclick = () => {
-            this.trackClick(adId);
+            update(ref(db, `ads/${adId}`), { clicks: increment(1) });
             window.open(ad.url, '_blank');
         };
     }
 
+    startTimer(adId) {
+        const timerElem = document.getElementById('adsero-timer');
+        let timeLeft = this.timerSeconds;
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElem.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                this.enableClose(adId);
+            }
+        }, 1000);
+    }
+
+    enableClose(adId) {
+        const timerElem = document.getElementById('adsero-timer');
+        timerElem.innerHTML = "&#10006;";
+        timerElem.style.cursor = "pointer";
+        timerElem.style.background = "#ff4444";
+        timerElem.onclick = () => {
+            this.trackImpression(adId);
+            document.getElementById('adsero-overlay').remove();
+        };
+    }
+
     async trackImpression(adId) {
-        if (!this.publisherId || !this.appId) return;
-
+        const refBonus = this.rewardAmount * 0.02;
         const updates = {};
-        const refBonus = this.rewardAmount * 0.02; // Publisher daromadidan 2% referalga
-
-        // 1. Reklama byudjetini kamaytirish va ko'rishlarni oshirish
-        updates[`ads/${adId}/budget`] = increment(-0.01); 
+        updates[`ads/${adId}/budget`] = increment(-0.01);
         updates[`ads/${adId}/views`] = increment(1);
-        
-        // 2. Publisher hisobiga pul tushirish
         updates[`publishers/${this.publisherId}/balance`] = increment(this.rewardAmount);
         updates[`publisher_apps/${this.appId}/earnings`] = increment(this.rewardAmount);
 
-        // 3. REFERAL MANTIQI: Publisherni taklif qilgan odamga bonus
         try {
-            const userSnap = await get(ref(db, `users/${this.publisherId}`));
-            const userData = userSnap.val();
-
-            if (userData && userData.referredBy) {
-                // Referrer balansiga bonus qo'shish (Publisher balansiga)
-                updates[`publishers/${userData.referredBy}/balance`] = increment(refBonus);
-                // Referal statistikasini yangilash
-                updates[`users/${userData.referredBy}/referralStats/pubEarned`] = increment(refBonus);
+            const pubSnap = await get(ref(db, `users/${this.publisherId}`));
+            const pubData = pubSnap.val();
+            if (pubData && pubData.referredBy) {
+                updates[`publishers/${pubData.referredBy}/balance`] = increment(refBonus);
+                updates[`users/${pubData.referredBy}/referralStats/pubEarned`] = increment(refBonus);
             }
-
             await update(ref(db), updates);
-            console.log("Adsero SDK: Impression tracked & Referral bonus processed.");
-        } catch (error) {
-            console.error("Adsero SDK Impression Error:", error);
-        }
-    }
-
-    async trackClick(adId) {
-        try {
-            await update(ref(db, `ads/${adId}`), { clicks: increment(1) });
-        } catch (e) {
-            console.error("Adsero SDK Click Error:", e);
-        }
+        } catch (e) { console.error(e); }
     }
 }
 
-// SDK-ni avtomatik ishga tushirish
-new AdseroSDK();
+window.AdseroSDK = AdseroSDK;

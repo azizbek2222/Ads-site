@@ -1,9 +1,12 @@
 // Koddan nusxa olish funksiyasi
 function copyCode(elementId) {
-    const codeText = document.getElementById(elementId).innerText;
+    const codeElement = document.getElementById(elementId);
+    const codeText = codeElement.innerText || codeElement.textContent;
+    
     navigator.clipboard.writeText(codeText).then(() => {
         const btn = event.target;
         const originalText = btn.innerText;
+        
         btn.innerText = "Copied!";
         btn.style.background = "#28a745";
         
@@ -12,23 +15,24 @@ function copyCode(elementId) {
             btn.style.background = "";
         }, 2000);
     }).catch(err => {
-        console.error('Copy error:', err);
+        console.error('Nusxa olishda xatolik:', err);
     });
 }
 
 // Sahifa yuklanganda bajariladigan logikalar
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Adsero Documentation loaded.");
-    
-    // Smooth scroll navigation
+    // Smooth scroll (Silliq o'tish)
     document.querySelectorAll('.sidebar nav a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
             if (href.startsWith('#')) {
                 e.preventDefault();
-                document.querySelector(href).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
             }
         });
     });

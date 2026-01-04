@@ -5,16 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation - Adsero SDK</title>
     <link rel="stylesheet" href="publisher.css">
+    <link rel="stylesheet" href="docs.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .doc-section { background: white; padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .doc-section h2 { color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--light-bg); padding-bottom: 10px; }
-        .step-number { background: var(--primary); color: white; width: 25px; height: 25px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; margin-right: 10px; }
-        .code-block { position: relative; }
-        .copy-btn { position: absolute; right: 10px; top: 10px; background: var(--success); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        code { line-height: 1.6; }
-        .info-note { background: #e7f3ff; border-left: 5px solid var(--primary); padding: 15px; margin: 15px 0; border-radius: 4px; }
-    </style>
 </head>
 <body>
     <div class="app-container">
@@ -43,7 +35,7 @@
 
             <section id="installation" class="doc-section">
                 <h2><span class="step-number">1</span> SDK Integration</h2>
-                <p>To start showing ads, first include the SDK script in your website's <code>&lt;head&gt;</code> or at the end of <code>&lt;body&gt;</code>. Replace <code>YOUR_APP_ID</code> with your project's unique ID.</p>
+                <p>Reklamalarni ko'rsatish uchun quyidagi scriptni saytingizning <code>&lt;head&gt;</code> qismiga joylashtiring.</p>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('code-install')">Copy</button>
                     <div class="sdk-box"><code id="code-install">&lt;script type="module" src="https://adsero.vercel.app/sdk.js" data-app-id="YOUR_APP_ID"&gt;&lt;/script&gt;</code></div>
@@ -51,39 +43,40 @@
             </section>
 
             <section id="usage" class="doc-section">
-                <h2><span class="step-number">2</span> Showing Interstitial Ads</h2>
-                <p>To trigger an ad, you need to initialize the <code>AdseroSDK</code> class and call the <code>showInterstitial()</code> method. You can set a custom countdown time (default is 15 seconds).</p>
+                <h2><span class="step-number">2</span> Reklamani chaqirish</h2>
+                <p>Reklamani ko'rsatish uchun <code>AdseroSDK</code> klassidan foydalaning. Funksiya reklamani tizim tomonidan belgilangan vaqt bilan chiqaradi.</p>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('code-usage')">Copy</button>
                     <div class="sdk-box"><code id="code-usage">
-// Initialize SDK
+// SDK ni ishga tushirish
 const adsero = new window.AdseroSDK();
 
-// Show ad with 15 seconds timer
-adsero.showInterstitial(15);
+// Reklamani ko'rsatish
+adsero.showInterstitial();
                     </code></div>
                 </div>
                 
                 <div class="info-note">
                     <i class="fas fa-info-circle"></i>
-                    <strong>Note:</strong> The ad will only show if there are active campaigns with enough budget in the system.
+                    <strong>Xavfsizlik:</strong> Reklama vaqti SDK ichida qat'iy belgilangan va foydalanuvchi tomonidan o'zgartirilishi mumkin emas.
                 </div>
             </section>
 
             <section class="doc-section">
-                <h2>Full Example</h2>
+                <h2>To'liq misol (Full Example)</h2>
+                <p>Tugma bosilganda reklamani chiqarish namunasi:</p>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('code-full')">Copy</button>
                     <div class="sdk-box"><code id="code-full">
-&lt;button onclick="showMyAd()"&gt;Watch Ad to Earn&lt;/button&gt;
+&lt;button onclick="startAd()"&gt;Bonus olish&lt;/button&gt;
 
 &lt;script&gt;
-  function showMyAd() {
+  function startAd() {
       if(window.AdseroSDK) {
           const ad = new AdseroSDK();
-          ad.showInterstitial(10); // 10 second timer
+          ad.showInterstitial(); 
       } else {
-          console.error("SDK not loaded yet");
+          console.error("SDK yuklanmagan!");
       }
   }
 &lt;/script&gt;
