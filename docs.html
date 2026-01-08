@@ -48,7 +48,7 @@
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('code-usage')">Copy</button>
                     <div class="sdk-box"><code id="code-usage">
-// Reklamani chaqirish funksiyasi
+// Call to action function
 async function startAd() {
     if (window.AdseroSDK) {
         const ad = new window.AdseroSDK();
@@ -71,14 +71,14 @@ async function startAd() {
                 <p>Copy this full code to test the integration instantly:</p>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('code-full')">Copy</button>
-                    <div class="sdk-box"><code id="code-full">&lt;!-- 1. SDK ulanishi --&gt;
+                    <div class="sdk-box"><code id="code-full">&lt;!-- 1. SDK connection --&gt;
 &lt;script type="module" src="https://adsero.vercel.app/sdk.js" data-app-id="YOUR_APP_ID"&gt;&lt;/script&gt;
 
-&lt;!-- 2. Reklama tugmasi --&gt;
+&lt;!-- 2. Advertising button --&gt;
 &lt;button id="adsero-btn"&gt;Get a bonus&lt;/button&gt;
 
 &lt;script&gt;
-  // Tugmaga bosilganda reklamani ko'rsatish
+  // Show an ad when the button is clicked
   document.getElementById('adsero-btn').addEventListener('click', async () => {
       if (window.AdseroSDK) {
           try {
